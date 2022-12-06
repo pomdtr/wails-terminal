@@ -1,0 +1,32 @@
+<!doctype html>
+<html>
+
+<head>
+    <link rel="stylesheet" href="./node_modules/xterm/css/xterm.css" />
+    <script src="./node_modules/xterm/lib/xterm.js"></script>
+    <script src="./node_modules/xterm-addon-attach/lib/xterm-addon-attach.js"></script>
+    <script src="./node_modules/xterm-addon-web-links/lib/xterm-addon-web-links.js"></script>
+</head>
+
+<body>
+    <div id="terminal"></div>
+    <script>
+        var term = new Terminal({
+            cursorBlink: true,
+        });
+        term.open(document.getElementById('terminal'));
+        var ws = new WebSocket("ws://localhost:8080/xterm");
+        var attachAddon = new AttachAddon.AttachAddon(ws);
+
+        ws.onopen = function () {
+            term.loadAddon(attachAddon);
+            term._initialized = true;
+            term.focus();
+        };
+        ws.onclose = function () {
+            term.write('connection has been terminated from the server-side (hit refresh to restart)')
+        };
+    </script>
+</body>
+
+</html>
