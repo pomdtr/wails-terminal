@@ -2,35 +2,52 @@ package main
 
 import (
 	"embed"
+	"fmt"
+	"os"
+	"os/exec"
 
+	"github.com/creack/pty"
 	"github.com/wailsapp/wails/v2"
 	"github.com/wailsapp/wails/v2/pkg/options"
 	"github.com/wailsapp/wails/v2/pkg/options/assetserver"
+	"github.com/wailsapp/wails/v2/pkg/options/mac"
 )
 
 //go:embed all:frontend/dist
 var assets embed.FS
 
 func main() {
+	var err error
+
 	// Create an instance of the app structure
 	app := NewApp()
-
-	server := NewServer()
-	go server.ListenAndServe()
+	cmd := exec.Command("fish")
+	pty, err := pty.Start(cmd)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
+	app.tty = pty
 
 	// Create application with options
-	err := wails.Run(&options.App{
-		Title:  "wails-xterm",
+	err = wails.Run(&options.App{
+		Title:  "sunbeam",
 		Width:  750,
 		Height: 475,
 		AssetServer: &assetserver.Options{
 			Assets: assets,
 		},
-		Frameless: true,
-		// AlwaysOnTop:      true,
-		DisableResize:    true,
-		BackgroundColour: &options.RGBA{R: 27, G: 38, B: 54, A: 50},
+		AlwaysOnTop:   true,
+		DisableResize: true,
+		Frameless:     true,
+		Mac: &mac.Options{
+			Appearance:           mac.DefaultAppearance,
+			WebviewIsTransparent: true,
+			WindowIsTranslucent:  true,
+		},
+		BackgroundColour: &options.RGBA{R: 27, G: 38, B: 54, A: 100},
 		OnStartup:        app.startup,
+		OnDomReady:       app.domReady,
 		Bind: []interface{}{
 			app,
 		},

@@ -3,17 +3,12 @@ module github.com/pomdtr/wails-xterm
 go 1.18
 
 require (
-	github.com/gorilla/handlers v1.5.1
-	github.com/gorilla/mux v1.8.0
-	github.com/gorilla/websocket v1.5.0
-	github.com/kr/pty v1.1.8
+	github.com/creack/pty v1.1.18
 	github.com/wailsapp/wails/v2 v2.2.0
 )
 
 require (
 	github.com/bep/debounce v1.2.1 // indirect
-	github.com/creack/pty v1.1.18 // indirect
-	github.com/felixge/httpsnoop v1.0.1 // indirect
 	github.com/go-ole/go-ole v1.2.6 // indirect
 	github.com/google/uuid v1.1.2 // indirect
 	github.com/imdario/mergo v0.3.12 // indirect
