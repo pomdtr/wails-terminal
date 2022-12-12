@@ -1,16 +1,13 @@
 import { Terminal } from "xterm";
 import { FitAddon } from "xterm-addon-fit";
 import { CanvasAddon } from "xterm-addon-canvas";
-import * as App from "../wailsjs/go/main/App.js";
-import * as runtime from "../wailsjs/runtime/runtime.js";
-import { Base64 } from "js-base64";
+import { AttachAddon } from "xterm-addon-attach";
+import * as App from "../wailsjs/go/main/App";
 
 const terminal = new Terminal({
   cursorBlink: true,
-  allowProposedApi: true,
   allowTransparency: true,
   macOptionIsMeta: true,
-  macOptionClickForcesSelection: true,
   fontSize: 13,
   fontFamily: "Consolas,Liberation Mono,Menlo,Courier,monospace",
   theme: {
@@ -18,37 +15,34 @@ const terminal = new Terminal({
   },
 });
 
+const ws = new WebSocket("ws://localhost:8080/ws");
+
 const fitAddon = new FitAddon();
 const canvasAddon = new CanvasAddon();
+const attachAddon = new AttachAddon(ws);
 
 terminal.open(document.getElementById("terminal")!);
 
 terminal.loadAddon(fitAddon);
 terminal.loadAddon(canvasAddon);
+terminal.loadAddon(attachAddon);
 
 terminal.focus();
 
-terminal.onResize((event) => {
-  var rows = event.rows;
-  var cols = event.cols;
-  App.SetTTYSize(rows, cols);
-});
+ws.onopen = () => {
+  const textEncoder = new TextEncoder();
+  terminal.onResize(({ cols, rows }) => {
+    const payload = JSON.stringify({ cols, rows });
+    const encodedPayload = textEncoder.encode(payload);
+    ws.send(encodedPayload);
+  });
+  fitAddon.fit();
+};
 
-terminal.onData(function (data) {
-  App.SendText(data);
-});
+window.onblur = () => {
+  App.HideWindow();
+};
 
 window.onresize = () => {
   fitAddon.fit();
 };
-
-runtime.EventsOn("ttyData", (base64) => {
-  const text = Base64.decode(base64);
-  terminal.write(text);
-});
-
-runtime.EventsOn("clearTerminal", () => {
-  terminal.clear();
-});
-
-fitAddon.fit();

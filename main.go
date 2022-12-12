@@ -2,11 +2,7 @@ package main
 
 import (
 	"embed"
-	"fmt"
-	"os"
-	"os/exec"
 
-	"github.com/creack/pty"
 	"github.com/wailsapp/wails/v2"
 	"github.com/wailsapp/wails/v2/pkg/options"
 	"github.com/wailsapp/wails/v2/pkg/options/assetserver"
@@ -21,13 +17,6 @@ func main() {
 
 	// Create an instance of the app structure
 	app := NewApp()
-	cmd := exec.Command("fish")
-	pty, err := pty.Start(cmd)
-	if err != nil {
-		fmt.Fprintln(os.Stderr, err)
-		os.Exit(1)
-	}
-	app.tty = pty
 
 	// Create application with options
 	err = wails.Run(&options.App{

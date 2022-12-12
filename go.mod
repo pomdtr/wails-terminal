@@ -3,14 +3,18 @@ module github.com/pomdtr/wails-xterm
 go 1.18
 
 require (
-	github.com/creack/pty v1.1.18
+	github.com/gorilla/mux v1.8.0
 	github.com/wailsapp/wails/v2 v2.2.0
 )
 
+require golang.design/x/hotkey v0.4.0
+
 require (
 	github.com/bep/debounce v1.2.1 // indirect
+	github.com/creack/pty v1.1.18
 	github.com/go-ole/go-ole v1.2.6 // indirect
 	github.com/google/uuid v1.1.2 // indirect
+	github.com/gorilla/websocket v1.5.0
 	github.com/imdario/mergo v0.3.12 // indirect
 	github.com/jchv/go-winloader v0.0.0-20210711035445-715c2860da7e // indirect
 	github.com/labstack/echo/v4 v4.9.0 // indirect
