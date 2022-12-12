@@ -13,7 +13,7 @@ import (
 	"github.com/wailsapp/wails/v2/pkg/runtime"
 )
 
-type ResizeMsg struct {
+type TTYSize struct {
 	Rows uint16 `json:"rows"`
 	Cols uint16 `json:"cols"`
 }
@@ -23,11 +23,6 @@ func NewServer(ctx context.Context) *http.Server {
 	router.HandleFunc("/ready", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte("OK"))
-	})
-
-	router.HandleFunc("/hide", func(w http.ResponseWriter, r *http.Request) {
-		runtime.WindowHide(ctx)
-		w.WriteHeader(http.StatusOK)
 	})
 
 	router.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
@@ -44,7 +39,6 @@ func NewServer(ctx context.Context) *http.Server {
 		}
 
 		cmd := exec.Command("bash")
-
 		tty, err := pty.Start(cmd)
 		if err != nil {
 			runtime.LogWarningf(ctx, "Error starting pty: %s", err.Error())
@@ -54,15 +48,26 @@ func NewServer(ctx context.Context) *http.Server {
 		waiter := sync.WaitGroup{}
 		waiter.Add(1)
 
+		var resizeMsg TTYSize
+
 		// tty -> xterm
 		go func() {
 			for {
 				buffer := make([]byte, 1024)
 				readLength, err := tty.Read(buffer)
 				if err != nil {
-					runtime.LogWarningf(ctx, "Error reading from pty, closing socket: %s", err.Error())
-					waiter.Done()
-					return
+					runtime.LogDebugf(ctx, "Error reading from pty (%s), restarting...", err.Error())
+					cmd := exec.Command("bash")
+					tty, err = pty.Start(cmd)
+					pty.Setsize(tty, &pty.Winsize{
+						Rows: resizeMsg.Rows,
+						Cols: resizeMsg.Cols,
+					})
+					runtime.WindowHide(ctx)
+					if err != nil {
+						runtime.LogWarningf(ctx, "Error restarting pty: %s", err.Error())
+					}
+					continue
 				}
 				if err := connection.WriteMessage(websocket.BinaryMessage, buffer[:readLength]); err != nil {
 					runtime.LogWarningf(ctx, "Error writing to websocket: %s", err.Error())
@@ -78,7 +83,6 @@ func NewServer(ctx context.Context) *http.Server {
 
 				if messageType == websocket.BinaryMessage {
 					runtime.LogDebugf(ctx, "Received binary message: %s", string(buffer))
-					var resizeMsg ResizeMsg
 					err = json.Unmarshal(buffer, &resizeMsg)
 					if err != nil {
 						runtime.LogWarningf(ctx, "Error unmarshalling resize message: %s", err.Error())
