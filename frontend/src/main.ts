@@ -1,4 +1,4 @@
-import { Terminal } from "xterm";
+import { ITheme, Terminal } from "xterm";
 import { FitAddon } from "xterm-addon-fit";
 import { CanvasAddon } from "xterm-addon-canvas";
 import * as App from "../wailsjs/go/main/App.js";
@@ -6,7 +6,10 @@ import * as runtime from "../wailsjs/runtime/runtime.js";
 import { Base64 } from "js-base64";
 
 async function main() {
-  const theme = await App.GetTheme();
+  const themeDark: ITheme = await App.GetDarkTheme();
+  themeDark.background += "80";
+  const themeLight: ITheme = await App.GetLightTheme();
+  themeLight.background += "80";
   const terminal = new Terminal({
     cursorBlink: true,
     allowProposedApi: true,
@@ -16,7 +19,9 @@ async function main() {
     scrollback: 0,
     fontSize: 13,
     fontFamily: "Consolas,Liberation Mono,Menlo,Courier,monospace",
-    theme: theme,
+    theme: window.matchMedia("(prefers-color-scheme: dark)").matches
+      ? themeDark
+      : themeLight,
   });
 
   const fitAddon = new FitAddon();
@@ -42,6 +47,13 @@ async function main() {
   window.onresize = () => {
     fitAddon.fit();
   };
+
+  window
+    .matchMedia("(prefers-color-scheme: dark)")
+    .addEventListener("change", function (e) {
+      console.log("color scheme changed", e.matches);
+      terminal.options.theme = e.matches ? themeDark : themeLight;
+    });
 
   runtime.EventsOn("tty-data", (data: string) => {
     terminal.write(Base64.toUint8Array(data));

@@ -17,7 +17,8 @@ var assets embed.FS
 func main() {
 	var err error
 
-	theme := flag.String("theme", "tomorrow-night", "Theme to use")
+	lightTheme := flag.String("light-theme", "tomorrow", "Theme to use")
+	darkTheme := flag.String("dark-theme", "tomorrow-night", "Theme to use")
 	flag.Parse()
 
 	args := flag.Args()
@@ -27,7 +28,9 @@ func main() {
 	}
 
 	// Create an instance of the app structure
-	app := NewApp(*theme, args)
+	app := NewApp(args)
+	app.darkTheme = *darkTheme
+	app.lightTheme = *lightTheme
 
 	// Create application with options
 	err = wails.Run(&options.App{
@@ -43,6 +46,7 @@ func main() {
 		Frameless:     true,
 		Mac: &mac.Options{
 			WebviewIsTransparent: true,
+			WindowIsTranslucent:  true,
 		},
 		BackgroundColour: &options.RGBA{R: 0, G: 0, B: 0, A: 1},
 		OnStartup:        app.startup,

@@ -24,7 +24,8 @@ type App struct {
 
 	tty *os.File
 
-	theme        string
+	lightTheme   string
+	darkTheme    string
 	args         []string
 	windowHidden bool
 
@@ -33,15 +34,14 @@ type App struct {
 }
 
 // NewApp creates a new App application struct
-func NewApp(theme string, args []string) *App {
-	return &App{theme: theme, args: args, windowHidden: true}
+func NewApp(args []string) *App {
+	return &App{args: args, windowHidden: true}
 }
 
 // startup is called when the app starts. The context is saved
 // so we can call the runtime methods
 func (a *App) startup(ctx context.Context) {
 	a.ctx = ctx
-	a.StartTTY()
 	go a.watchHotkey(ctx)
 }
 
@@ -71,6 +71,7 @@ func (a *App) StartTTY() error {
 }
 
 func (a *App) Start() {
+	a.StartTTY()
 	a.ShowWindow()
 	go func() {
 		for {
@@ -92,9 +93,7 @@ func (a *App) Start() {
 	}()
 }
 
-func (a *App) GetTheme() map[string]string {
-	themePath := fmt.Sprintf("themes/%s.json", a.theme)
-
+func (a *App) getTheme(themePath string) map[string]string {
 	bytes, err := themes.ReadFile(themePath)
 	if err != nil {
 		runtime.LogWarningf(a.ctx, "Error reading theme: %s", err)
@@ -108,6 +107,16 @@ func (a *App) GetTheme() map[string]string {
 	}
 
 	return theme
+}
+
+func (a *App) GetDarkTheme() map[string]string {
+	darkTheme := fmt.Sprintf("themes/%s.json", a.darkTheme)
+	return a.getTheme(darkTheme)
+}
+
+func (a *App) GetLightTheme() map[string]string {
+	darkTheme := fmt.Sprintf("themes/%s.json", a.lightTheme)
+	return a.getTheme(darkTheme)
 }
 
 func (a *App) ShowWindow() {
