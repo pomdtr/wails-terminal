@@ -1,0 +1,6 @@
+{
+  "devDependencies": {
+    "degit": "^2.8.4",
+    "lodash": "^4.17.21"
+  }
+}

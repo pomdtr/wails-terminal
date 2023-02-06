@@ -1,0 +1,22 @@
+{
+  "foreground": "#eeeeec",
+  "background": "#111416",
+  "black": "#000000",
+  "blue": "#1093f5",
+  "cyan": "#00cdcd",
+  "green": "#00cd00",
+  "magenta": "#cd00cd",
+  "red": "#cd0000",
+  "white": "#faebd7",
+  "yellow": "#cdcd00",
+  "brightBlack": "#404040",
+  "brightBlue": "#11b5f6",
+  "brightCyan": "#00ffff",
+  "brightGreen": "#00ff00",
+  "brightMagenta": "#ff00ff",
+  "brightRed": "#ff0000",
+  "brightWhite": "#ffffff",
+  "brightYellow": "#ffff00",
+  "selectionBackground": "#eeeeec",
+  "cursor": "#bbbbbb"
+}

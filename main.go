@@ -2,11 +2,9 @@ package main
 
 import (
 	"embed"
-	"fmt"
+	"flag"
 	"os"
-	"os/exec"
 
-	"github.com/creack/pty"
 	"github.com/wailsapp/wails/v2"
 	"github.com/wailsapp/wails/v2/pkg/options"
 	"github.com/wailsapp/wails/v2/pkg/options/assetserver"
@@ -19,21 +17,24 @@ var assets embed.FS
 func main() {
 	var err error
 
-	// Create an instance of the app structure
-	app := NewApp()
-	cmd := exec.Command("fish")
-	pty, err := pty.Start(cmd)
-	if err != nil {
-		fmt.Fprintln(os.Stderr, err)
-		os.Exit(1)
+	theme := flag.String("theme", "tomorrow-night", "Theme to use")
+	flag.Parse()
+
+	args := flag.Args()
+	if len(args) == 0 {
+		shell := os.Getenv("SHELL")
+		args = []string{shell, "-li"}
 	}
-	app.tty = pty
+
+	// Create an instance of the app structure
+	app := NewApp(*theme, args)
 
 	// Create application with options
 	err = wails.Run(&options.App{
-		Title:  "sunbeam",
-		Width:  750,
-		Height: 475,
+		Title:       "Wails Terminal",
+		Width:       750,
+		StartHidden: true,
+		Height:      475,
 		AssetServer: &assetserver.Options{
 			Assets: assets,
 		},
@@ -43,9 +44,8 @@ func main() {
 		Mac: &mac.Options{
 			WebviewIsTransparent: true,
 		},
-		BackgroundColour: &options.RGBA{R: 27, G: 38, B: 54, A: 100},
+		BackgroundColour: &options.RGBA{R: 0, G: 0, B: 0, A: 1},
 		OnStartup:        app.startup,
-		OnDomReady:       app.domReady,
 		Bind: []interface{}{
 			app,
 		},
