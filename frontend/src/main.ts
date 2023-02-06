@@ -11,11 +11,9 @@ const terminal = new Terminal({
   allowTransparency: true,
   macOptionIsMeta: true,
   macOptionClickForcesSelection: true,
+  scrollback: 0,
   fontSize: 13,
   fontFamily: "Consolas,Liberation Mono,Menlo,Courier,monospace",
-  theme: {
-    background: "rgba(0, 0, 0, 0)",
-  },
 });
 
 const fitAddon = new FitAddon();
@@ -42,13 +40,16 @@ window.onresize = () => {
   fitAddon.fit();
 };
 
-runtime.EventsOn("ttyData", (base64) => {
-  const text = Base64.decode(base64);
-  terminal.write(text);
+runtime.EventsOn("ttyData", (data: string) => {
+  terminal.write(Base64.toUint8Array(data));
 });
 
-runtime.EventsOn("clearTerminal", () => {
+runtime.EventsOn("clear-terminal", () => {
   terminal.clear();
 });
+
+window.onblur = () => {
+  App.HideWindow();
+};
 
 fitAddon.fit();
