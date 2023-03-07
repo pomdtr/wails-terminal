@@ -1,15 +1,13 @@
 import { ITheme, Terminal } from "xterm";
 import { FitAddon } from "xterm-addon-fit";
 import { CanvasAddon } from "xterm-addon-canvas";
-import * as App from "../wailsjs/go/main/App.js";
+import * as App from "../wailsjs/go/main/App";
 import * as runtime from "../wailsjs/runtime/runtime.js";
 import { Base64 } from "js-base64";
 
 async function main() {
   const themeDark: ITheme = await App.GetDarkTheme();
-  themeDark.background += "80";
   const themeLight: ITheme = await App.GetLightTheme();
-  themeLight.background += "80";
   const terminal = new Terminal({
     cursorBlink: true,
     allowProposedApi: true,
@@ -62,10 +60,6 @@ async function main() {
   runtime.EventsOn("clear-terminal", () => {
     terminal.clear();
   });
-
-  window.onblur = () => {
-    App.HideWindow();
-  };
 
   fitAddon.fit();
 

@@ -8,7 +8,6 @@ import (
 	"github.com/wailsapp/wails/v2"
 	"github.com/wailsapp/wails/v2/pkg/options"
 	"github.com/wailsapp/wails/v2/pkg/options/assetserver"
-	"github.com/wailsapp/wails/v2/pkg/options/mac"
 )
 
 //go:embed all:frontend/dist
@@ -16,9 +15,13 @@ var assets embed.FS
 
 func main() {
 	var err error
+	flags := struct {
+		lightTheme string
+		darkTheme  string
+	}{}
 
-	lightTheme := flag.String("light-theme", "tomorrow", "Theme to use")
-	darkTheme := flag.String("dark-theme", "tomorrow-night", "Theme to use")
+	flag.StringVar(&flags.lightTheme, "light-theme", "tomorrow", "Theme to use")
+	flag.StringVar(&flags.darkTheme, "dark-theme", "tomorrow-night", "Theme to use")
 	flag.Parse()
 
 	args := flag.Args()
@@ -27,26 +30,32 @@ func main() {
 		args = []string{shell, "-li"}
 	}
 
+	lightTheme, err := loadTheme(flags.lightTheme)
+	if err != nil {
+		println("Error:", err.Error())
+		os.Exit(1)
+	}
+
+	darkTheme, err := loadTheme(flags.darkTheme)
+	if err != nil {
+		println("Error:", err.Error())
+		os.Exit(1)
+	}
+
 	// Create an instance of the app structure
-	app := NewApp(args)
-	app.darkTheme = *darkTheme
-	app.lightTheme = *lightTheme
+	app := NewApp(TerminalOptions{
+		args:       args,
+		lightTheme: lightTheme,
+		darkTheme:  darkTheme,
+	})
 
 	// Create application with options
 	err = wails.Run(&options.App{
-		Title:       "Wails Terminal",
-		Width:       750,
-		StartHidden: true,
-		Height:      475,
+		Title:  "Wails Terminal",
+		Width:  750,
+		Height: 475,
 		AssetServer: &assetserver.Options{
 			Assets: assets,
-		},
-		AlwaysOnTop:   true,
-		DisableResize: true,
-		Frameless:     true,
-		Mac: &mac.Options{
-			WebviewIsTransparent: true,
-			WindowIsTranslucent:  true,
 		},
 		BackgroundColour: &options.RGBA{R: 0, G: 0, B: 0, A: 1},
 		OnStartup:        app.startup,

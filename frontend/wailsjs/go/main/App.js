@@ -10,20 +10,12 @@ export function GetLightTheme() {
   return window['go']['main']['App']['GetLightTheme']();
 }
 
-export function HideWindow() {
-  return window['go']['main']['App']['HideWindow']();
-}
-
 export function SendText(arg1) {
   return window['go']['main']['App']['SendText'](arg1);
 }
 
 export function SetTTYSize(arg1, arg2) {
   return window['go']['main']['App']['SetTTYSize'](arg1, arg2);
-}
-
-export function ShowWindow() {
-  return window['go']['main']['App']['ShowWindow']();
 }
 
 export function Start() {
